@@ -1,4 +1,3 @@
-// ...existing code...
 // server.js
 // Serveur Node.js pour envoyer des notifications push avec VAPID
 
@@ -35,8 +34,15 @@ app.post('/subscribe', (req, res) => {
 app.post('/sendNotification', (req, res) => {
   const { title, message } = req.body;
   const payload = JSON.stringify({ title, message });
-  subscriptions.forEach(sub => {
-    webpush.sendNotification(sub, payload).catch(err => console.error(err));
+  console.log('[sendNotification] Nombre d’abonnés :', subscriptions.length);
+  if (subscriptions.length === 0) {
+    console.warn('[sendNotification] Aucun abonnement push enregistré.');
+    return res.status(200).json({ success: false, message: 'Aucun abonnement push.' });
+  }
+  subscriptions.forEach((sub, idx) => {
+    webpush.sendNotification(sub, payload)
+      .then(() => console.log(`[sendNotification] Notification envoyée à l’abonné #${idx}`))
+      .catch(err => console.error(`[sendNotification] Erreur envoi à l’abonné #${idx} :`, err));
   });
   res.status(200).json({ success: true });
 });
@@ -45,4 +51,13 @@ const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {
   console.log(`Server started on port ${PORT}`);
 });
-// ...existing code...
+
+
+
+
+
+
+
+
+
+
